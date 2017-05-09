@@ -185,7 +185,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.0-a66be5811478a4d2193809e4394e1c6cd0fac979"})
+}).call(this,{"version":"1.2.0-663308bb42405328a329256a9a44bed8266d0c79"})
 },{"any-base":2,"jssha":4,"progressbar.js":7,"qrcodejs2":12}],2:[function(require,module,exports){
 var Converter = require('./src/converter');
 
