@@ -4,53 +4,10 @@
 
 document.getElementById('appversion').innerText = app.version;
 
-var jsSHA = require('jssha');
-var anyBase = require('any-base');
-anyBase.ZBASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+var TOTP = require('./totp');
 
 var ProgressBar = require('progressbar.js');
 var QRCode = require('qrcodejs2');
-
-var decToHex = anyBase(anyBase.DEC, anyBase.HEX);
-var hexToDec = anyBase(anyBase.HEX, anyBase.DEC);
-var zbase32ToHex = anyBase(anyBase.ZBASE32, anyBase.HEX);
-
-var leftPad = function(str, minLength, pad) {
-  if (str.length >= minLength) {
-    return str
-  }
-  return pad.repeat(minLength - str.length) + str;
-};
-
-var getEpochSeconds = function() {
-  return Math.floor(new Date().getTime() / 1000.0);
-}
-
-function TOTP(secretZBase32) {
-  var stepSeconds = 30;
-  this.secretZBase32 = secretZBase32.toUpperCase();
-
-  this.getToken = function() {
-    var shaObj = new jsSHA("SHA-1", "HEX");
-
-    var secretHex = zbase32ToHex(this.secretZBase32);
-    var secretHexPadded = leftPad(secretHex, Math.ceil(secretHex.length / 2) * 2, '0');
-    shaObj.setHMACKey(secretHexPadded, "HEX");
-
-    var timeHex = decToHex(String(Math.floor(getEpochSeconds() / stepSeconds)))
-    var timeHexPadded = leftPad(timeHex, 16, '0');
-    shaObj.update(timeHexPadded);
-
-    var hmac = shaObj.getHMAC("HEX");
-    var offset = hexToDec(hmac.slice(-1));
-    var token = String(hexToDec(hmac.substr(offset * 2, 8)) & hexToDec('7fffffff'));
-    return token.slice(-6);
-  }
-
-  this.getRemainingSeconds = function() {
-    return stepSeconds - getEpochSeconds() % stepSeconds;
-  }
-}
 
 var totpRemainingSecondsCircle = new ProgressBar.Circle(document.getElementById('totp-token-remaining-seconds-circle'), {
   strokeWidth: 50,
@@ -185,8 +142,55 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.0-663308bb42405328a329256a9a44bed8266d0c79"})
-},{"any-base":2,"jssha":4,"progressbar.js":7,"qrcodejs2":12}],2:[function(require,module,exports){
+}).call(this,{"version":"1.2.0-9bc5a9c5273397462d4ca54587ddef3ba33ae26c"})
+},{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
+var jsSHA = require('jssha');
+var anyBase = require('any-base');
+anyBase.ZBASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+var decToHex = anyBase(anyBase.DEC, anyBase.HEX);
+var hexToDec = anyBase(anyBase.HEX, anyBase.DEC);
+var zbase32ToHex = anyBase(anyBase.ZBASE32, anyBase.HEX);
+
+var getEpochSeconds = function() {
+  return Math.floor(new Date().getTime() / 1000.0);
+}
+
+function TOTP(secretZBase32) {
+  var stepSeconds = 30;
+  this.secretZBase32 = secretZBase32.toUpperCase();
+
+  this.getToken = function() {
+    var shaObj = new jsSHA("SHA-1", "HEX");
+
+    var secretHex = zbase32ToHex(this.secretZBase32);
+    if (secretHex % 2 !== 0){
+      secretHex = '0' + secretHex;
+      if(secretHex.endsWith('0')) {
+        secretHex = secretHex.slice(0, -1);
+      }
+    }
+    shaObj.setHMACKey(secretHex, "HEX");
+
+    var counter = Math.floor(getEpochSeconds() / stepSeconds);
+    var timeHex = decToHex(counter.toString())
+    var timeHexPadded = ('0'.repeat(16) + timeHex).slice(-16); // left pad with zeros
+    shaObj.update(timeHexPadded);
+
+    var hmac = shaObj.getHMAC("HEX");
+    var offset = hexToDec(hmac.slice(-1));
+    var token = String(hexToDec(hmac.substr(offset * 2, 8)) & hexToDec('7fffffff'));
+    return token.slice(-6);
+  }
+
+  this.getRemainingSeconds = function() {
+    return stepSeconds - getEpochSeconds() % stepSeconds;
+  }
+}
+
+module.exports = TOTP;
+
+},{"any-base":3,"jssha":5}],3:[function(require,module,exports){
 var Converter = require('./src/converter');
 
 /**
@@ -217,7 +221,7 @@ anyBase.DEC = '0123456789';
 anyBase.HEX = '0123456789abcdef';
 
 module.exports = anyBase;
-},{"./src/converter":3}],3:[function(require,module,exports){
+},{"./src/converter":4}],4:[function(require,module,exports){
 'use strict';
 
 /**
@@ -277,7 +281,7 @@ Converter.prototype.convert = function(number) {
 }
 
 module.exports = Converter;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*
  A JavaScript implementation of the SHA family of hashes, as
  defined in FIPS PUB 180-4 and FIPS PUB 202, as well as the corresponding
@@ -324,7 +328,7 @@ f[d]>>>24));for(c=0;24>c;c+=1){k=B("SHA3-");for(d=0;5>d;d+=1)g[d]=A(b[d][0],b[d]
 3409855158),new a(1501505948,4234509866),new a(1607167915,987167468),new a(1816402316,1246189591)];W=[new a(0,1),new a(0,32898),new a(2147483648,32906),new a(2147483648,2147516416),new a(0,32907),new a(0,2147483649),new a(2147483648,2147516545),new a(2147483648,32777),new a(0,138),new a(0,136),new a(0,2147516425),new a(0,2147483658),new a(0,2147516555),new a(2147483648,139),new a(2147483648,32905),new a(2147483648,32771),new a(2147483648,32770),new a(2147483648,128),new a(0,32778),new a(2147483648,
 2147483658),new a(2147483648,2147516545),new a(2147483648,32896),new a(0,2147483649),new a(2147483648,2147516424)];V=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];"function"===typeof define&&define.amd?define(function(){return C}):"undefined"!==typeof exports?("undefined"!==typeof module&&module.exports&&(module.exports=C),exports=C):X.jsSHA=C})(this);
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // Circle shaped progress bar
 
 var Shape = require('./shape');
@@ -366,7 +370,7 @@ Circle.prototype._trailString = function _trailString(opts) {
 
 module.exports = Circle;
 
-},{"./shape":10,"./utils":11}],6:[function(require,module,exports){
+},{"./shape":11,"./utils":12}],7:[function(require,module,exports){
 // Line shaped progress bar
 
 var Shape = require('./shape');
@@ -397,7 +401,7 @@ Line.prototype._trailString = function _trailString(opts) {
 
 module.exports = Line;
 
-},{"./shape":10,"./utils":11}],7:[function(require,module,exports){
+},{"./shape":11,"./utils":12}],8:[function(require,module,exports){
 module.exports = {
     // Higher level API, different shaped progress bars
     Line: require('./line'),
@@ -416,7 +420,7 @@ module.exports = {
     utils: require('./utils')
 };
 
-},{"./circle":5,"./line":6,"./path":8,"./semicircle":9,"./shape":10,"./utils":11}],8:[function(require,module,exports){
+},{"./circle":6,"./line":7,"./path":9,"./semicircle":10,"./shape":11,"./utils":12}],9:[function(require,module,exports){
 // Lower level API to animate any kind of svg path
 
 var Tweenable = require('shifty');
@@ -590,7 +594,7 @@ Path.prototype._easing = function _easing(easing) {
 
 module.exports = Path;
 
-},{"./utils":11,"shifty":13}],9:[function(require,module,exports){
+},{"./utils":12,"shifty":14}],10:[function(require,module,exports){
 // Semi-SemiCircle shaped progress bar
 
 var Shape = require('./shape');
@@ -640,7 +644,7 @@ SemiCircle.prototype._trailString = Circle.prototype._trailString;
 
 module.exports = SemiCircle;
 
-},{"./circle":5,"./shape":10,"./utils":11}],10:[function(require,module,exports){
+},{"./circle":6,"./shape":11,"./utils":12}],11:[function(require,module,exports){
 // Base object for different progress bar shapes
 
 var Path = require('./path');
@@ -960,7 +964,7 @@ Shape.prototype._warnContainerAspectRatio = function _warnContainerAspectRatio(c
 
 module.exports = Shape;
 
-},{"./path":8,"./utils":11}],11:[function(require,module,exports){
+},{"./path":9,"./utils":12}],12:[function(require,module,exports){
 // Utility functions
 
 var PREFIXES = 'Webkit Moz O ms'.split(' ');
@@ -1099,7 +1103,7 @@ module.exports = {
     removeChildren: removeChildren
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'
@@ -1728,7 +1732,7 @@ var QRCode;
 	
 }));
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /* shifty - v1.5.3 - 2016-11-29 - http://jeremyckahn.github.io/shifty */
 ;(function () {
   var root = this || Function('return this')();
