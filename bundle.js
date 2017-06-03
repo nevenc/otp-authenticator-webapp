@@ -36,7 +36,7 @@ document.getElementById('button-otpauth-qr').addEventListener('click', function(
 var qrImage = new QRCode(document.getElementById('otpauth-qr'), {
   colorDark: "#000000",
   colorLight: "#ffffff",
-  correctLevel: QRCode.CorrectLevel.M
+  correctLevel: QRCode.CorrectLevel.Q
 });
 
 var update = function() {
@@ -142,7 +142,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.7-9ac0487f580a11a90d37fbaaf1dcc09d6739cd79"})
+}).call(this,{"version":"1.2.7-7e3e79433a26d9885f24af484d7c85d7110b15da"})
 },{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 var anyBase = require('any-base');
