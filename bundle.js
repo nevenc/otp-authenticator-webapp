@@ -126,7 +126,7 @@ function refresh_totp() {
     var totp = new TOTP(secret);
     try {
       totpTokenElement.innerHTML = totp.getToken().replace(/(...)(?=.)/g, "$& ");
-      if (totp.getRemainingSeconds() / 30.0 == 0) {
+      if (totp.getRemainingSeconds() / 30.0 <= 0) {
         totpRemainingSecondsCircle.set(1.0);
       } else {
         totpRemainingSecondsCircle.animate(totp.getRemainingSeconds() / 30.0);
@@ -142,7 +142,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.0-9bc5a9c5273397462d4ca54587ddef3ba33ae26c"})
+}).call(this,{"version":"1.2.7-9ac0487f580a11a90d37fbaaf1dcc09d6739cd79"})
 },{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 var anyBase = require('any-base');
@@ -164,7 +164,7 @@ function TOTP(secretZBase32) {
     var shaObj = new jsSHA("SHA-1", "HEX");
 
     var secretHex = zbase32ToHex(this.secretZBase32);
-    if (secretHex % 2 !== 0){
+    if (secretHex.length % 2 !== 0) {
       secretHex = '0' + secretHex;
       if(secretHex.endsWith('0')) {
         secretHex = secretHex.slice(0, -1);
