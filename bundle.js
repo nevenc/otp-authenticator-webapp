@@ -17,21 +17,22 @@ var totpRemainingSecondsCircle = new ProgressBar.Circle(document.getElementById(
 });
 totpRemainingSecondsCircle.svg.style.transform = 'scale(-1, 1)';
 
-document.getElementById('button-otpauth-qr').addEventListener('click', function(e) {
-  var otpauthQrImage = document.getElementById('otpauth-qr');
-  var accountInput = document.getElementById('inputAccount');
-  var issuerInput = document.getElementById('inputIssuer');
-  if (otpauthQrImage.style.display == 'none') {
-    otpauthQrImage.style.display = "inherit";
-    accountInput.style.display = "inherit";
-    issuerInput.style.display = "inherit";
-  } else {
-    otpauthQrImage.style.display = "none";
-    accountInput.style.display = "none";
-    issuerInput.style.display = "none";
-  }
-}, false);
-
+['click', 'tap'].forEach(function(event) {
+  document.getElementById('button-otpauth-qr').addEventListener(event, function(e) {
+    var otpauthQrImage = document.getElementById('otpauth-qr');
+    var accountInput = document.getElementById('inputAccount');
+    var issuerInput = document.getElementById('inputIssuer');
+    if (otpauthQrImage.style.display == 'none') {
+      otpauthQrImage.style.display = "inherit";
+      accountInput.style.display = "inherit";
+      issuerInput.style.display = "inherit";
+    } else {
+      otpauthQrImage.style.display = "none";
+      accountInput.style.display = "none";
+      issuerInput.style.display = "none";
+    }
+  }, false);
+});
 
 var qrImage = new QRCode(document.getElementById('otpauth-qr'), {
   colorDark: "#000000",
@@ -142,7 +143,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.7-7e3e79433a26d9885f24af484d7c85d7110b15da"})
+}).call(this,{"version":"1.2.7-65098924db7b047ed22f26543ea0ce7b8a927d8c"})
 },{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 var anyBase = require('any-base');
