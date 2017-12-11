@@ -143,7 +143,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-5470d31910f523a2e027050e951739c60e20604c"})
+}).call(this,{"version":"1.2.8-bfb4bbe7cf356846c3a921a73f307067a5ae2774"})
 },{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 var anyBase = require('any-base');
@@ -166,9 +166,9 @@ function TOTP(secretZBase32) {
 
     var secretHex = zbase32ToHex(this.secretZBase32);
     if (secretHex.length % 2 !== 0) {
-      if(secretHex.endsWith('0')) {
+      if (secretHex.endsWith('0')) {
         secretHex = secretHex.slice(0, -1);
-      }else{
+      } else {
         secretHex = '0' + secretHex;
       }
     }
