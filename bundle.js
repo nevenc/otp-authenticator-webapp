@@ -143,7 +143,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-94dd7ec4f9750ab3984f180cd76880d006198141"})
+}).call(this,{"version":"1.2.8-edcfa999a3dbc903e30239c5dd080ec8be5d4c5d"})
 },{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 var anyBase = require('any-base');
@@ -166,9 +166,10 @@ function TOTP(secretZBase32) {
 
     var secretHex = zbase32ToHex(this.secretZBase32);
     if (secretHex.length % 2 !== 0) {
-      secretHex = '0' + secretHex;
       if(secretHex.endsWith('0')) {
         secretHex = secretHex.slice(0, -1);
+      }else{
+        secretHex = '0' + secretHex;
       }
     }
     shaObj.setHMACKey(secretHex, "HEX");
