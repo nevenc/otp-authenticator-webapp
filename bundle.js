@@ -143,7 +143,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-08a226a73bb3c2ff13208bc77f626ae22b2a51de"})
+}).call(this,{"version":"1.2.8-0c96940abb6794cf332867e1764c905fae45ef0a"})
 },{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 var anyBase = require('any-base');
