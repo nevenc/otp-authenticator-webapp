@@ -46,8 +46,15 @@ var update = function() {
     var otpauthUrl = new URL(secret);
     secret = otpauthUrl.searchParams.get('secret');
     document.getElementById('inputSecret').value = secret;
-    document.getElementById('inputAccount').value = decodeURIComponent(otpauthUrl.pathname).split(':')[1] || '';
-    document.getElementById('inputIssuer').value = otpauthUrl.searchParams.get('issuer') || '';
+    if(!decodeURIComponent(otpauthUrl.pathname).includes(":")){
+      document.getElementById('inputAccount').value = decodeURIComponent(otpauthUrl.pathname);
+    } else {
+      document.getElementById('inputIssuer').value = decodeURIComponent(otpauthUrl.pathname).split(':')[0];
+      document.getElementById('inputAccount').value = decodeURIComponent(otpauthUrl.pathname).split(':')[1];
+    }
+    if(otpauthUrl.searchParams.get('issuer')){
+      document.getElementById('inputIssuer').value = otpauthUrl.searchParams.get('issuer');
+    }
   }
   var account = document.getElementById('inputAccount').value;
   var issuer = document.getElementById('inputIssuer').value;
@@ -140,7 +147,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-29798e8d9187ceae361545da58f2731a7d918e7d"})
+}).call(this,{"version":"1.2.8-e38d2744d5f9270d95cb658274499548b7e5dda0"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
