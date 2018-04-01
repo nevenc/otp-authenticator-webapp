@@ -149,7 +149,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-70376b50f5f085f5c977502b59c94e93e040ade3"})
+}).call(this,{"version":"1.2.8-9d4c244c4c2a24eeeb697be7bcf5120016aa8b60"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
@@ -174,7 +174,6 @@ function base32ToHex(base32) {
   }
 
   let hex = '';
-  bits = bits.padEnd(Math.floor(bits.length/4)*4 ,'0');	
   for (let i = 0; i + 4 <= bits.length; i += 4) {
     let chunk = bits.substr(i, 4);
     hex += parseInt(chunk, 2).toString(16);
