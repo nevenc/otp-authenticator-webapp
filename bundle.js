@@ -147,7 +147,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-662e700df497a6c9907fa785971a29bd1837fdbd"})
+}).call(this,{"version":"1.2.8-11590e80de8e739e24c3810475b4957645dd2e5f"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
@@ -187,11 +187,11 @@ function TOTP(secretBase32) {
   this.tokenLength = 6;
   
   this.getToken = function() {
-    let secretHex = base32ToHex(secretBase32);
+    let secretHex = base32ToHex(this.secretBase32);
     if (secretHex.length % 2 !== 0) {
       secretHex += '0';
     }
-    let counter = Math.floor(Date.now()/1000/stepSeconds);
+    let counter = Math.floor(Date.now()/1000/this.stepSeconds);
     let counterHex = decToHex(counter);
 
     let shaObj = new jsSHA("SHA-1", "HEX");
@@ -205,7 +205,7 @@ function TOTP(secretBase32) {
   }
   
   this.getRemainingSeconds = function() {
-    return stepSeconds - (Date.now()/1000) % stepSeconds;
+    return this.stepSeconds - (Date.now()/1000) % this.stepSeconds;
   }
 }
 
