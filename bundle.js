@@ -1,4 +1,4 @@
-(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (app){
 "use strict";
 
@@ -143,147 +143,72 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-494d4eba4199c66cff5823fb290a53e89feb726d"})
-},{"./totp":2,"progressbar.js":8,"qrcodejs2":13}],2:[function(require,module,exports){
+}).call(this,{"version":"1.2.8-3dbac3caa4449de41d69f6c9dbd0bb2a7d7f5f69"})
+},{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
-var anyBase = require('any-base');
-anyBase.ZBASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-var decToHex = anyBase(anyBase.DEC, anyBase.HEX);
-var hexToDec = anyBase(anyBase.HEX, anyBase.DEC);
-var zbase32ToHex = anyBase(anyBase.ZBASE32, anyBase.HEX);
-
-var getEpochSeconds = function() {
-  return Math.floor(new Date().getTime() / 1000.0);
+function decToHex(dec){
+  return dec.toString(16);
 }
 
-function TOTP(secretZBase32) {
-  var stepSeconds = 30;
-  this.secretZBase32 = secretZBase32.toUpperCase();
+function hexToDec(hex){
+  return parseInt(hex, 16);
+}
 
-  this.getToken = function() {
-    var shaObj = new jsSHA("SHA-1", "HEX");
+function base32ToHex(base32) {
+	const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
-    var secretHex = zbase32ToHex(this.secretZBase32);
-    if (secretHex.length % 2 !== 0) {
-      if (secretHex.endsWith('0')) {
-        secretHex = secretHex.slice(0, -1);
-      } else {
-        secretHex = '0' + secretHex;
-      }
+  let bits = '';
+	for (let i = 0; i < base32.length; i++) {
+		let val = base32chars.indexOf(base32.charAt(i).toUpperCase());
+    if(val < 0){
+      throw new Error("Illegal Base32 character: " + base32.charAt(i));
     }
+		bits += val.toString(2).padStart(5, "0");
+	}
+
+  let hex = '';
+  bits = bits.padMultiple(4, "0");
+	for (let i = 0; i + 4 <= bits.length; i += 4) {
+		let chunk = bits.substr(i, 4);
+		hex += parseInt(chunk, 2).toString(16);
+	}
+  
+	return hex;
+}
+
+
+function TOTP(secretBase32) {
+  this.secretBase32 = secretBase32;
+  this.stepSeconds = 30;
+  this.tokenLength = 6;
+  
+  this.getToken = function() {
+    let secretHex = base32ToHex(secretBase32);
+    if (secretHex.length % 2 !== 0) {
+      secretHex += '0';
+    }
+    let counter = Math.floor(Date.now()/1000/stepSeconds);
+    let counterHex = decToHex(counter);
+
+    let shaObj = new jsSHA("SHA-1", "HEX");
     shaObj.setHMACKey(secretHex, "HEX");
+    shaObj.update(counterHex.padStart(16, "0"));
+    let hmac = shaObj.getHMAC("HEX");
+    let offset = hexToDec(hmac.slice(-1));
+    let token = String(hexToDec(hmac.substr(offset * 2, 8)) & hexToDec('7fffffff')).slice(-6);
 
-    var counter = Math.floor(getEpochSeconds() / stepSeconds);
-    var timeHex = decToHex(counter.toString())
-    var timeHexPadded = ('0'.repeat(16) + timeHex).slice(-16); // left pad with zeros
-    shaObj.update(timeHexPadded);
-
-    var hmac = shaObj.getHMAC("HEX");
-    var offset = hexToDec(hmac.slice(-1));
-    var token = String(hexToDec(hmac.substr(offset * 2, 8)) & hexToDec('7fffffff'));
-    return token.slice(-6);
+    return token;
   }
-
+  
   this.getRemainingSeconds = function() {
-    return stepSeconds - getEpochSeconds() % stepSeconds;
+    return stepSeconds - (Date.now()/1000) % stepSeconds;
   }
 }
 
 module.exports = TOTP;
 
-},{"any-base":3,"jssha":5}],3:[function(require,module,exports){
-var Converter = require('./src/converter');
-
-/**
- * Function get source and destination alphabet and return convert function
- *
- * @param {string} srcAlphabet
- * @param {string} dstAlphabet
- *
- * @returns {function(number)}
- */
-function anyBase(srcAlphabet, dstAlphabet) {
-    var converter = new Converter(srcAlphabet, dstAlphabet);
-    /**
-     * Convert function
-     *
-     * @param {string} number
-     *
-     * @return {string} number
-     */
-    return function (number) {
-        return converter.convert(number);
-    }
-};
-
-anyBase.BIN = '01';
-anyBase.OCT = '01234567';
-anyBase.DEC = '0123456789';
-anyBase.HEX = '0123456789abcdef';
-
-module.exports = anyBase;
-},{"./src/converter":4}],4:[function(require,module,exports){
-'use strict';
-
-/**
- * Converter
- *
- * @param {string} srcAlphabet
- * @param {string} dstAlphabet
- * @constructor
- */
-function Converter(srcAlphabet, dstAlphabet) {
-    if (!srcAlphabet || !dstAlphabet || !srcAlphabet.length || !dstAlphabet.length) {
-        throw new Error('Bad alphabet');
-    }
-    this.srcAlphabet = srcAlphabet;
-    this.dstAlphabet = dstAlphabet;
-}
-
-/**
- * Convert number from source alphabet to destonation alphabet
- *
- * @param {string} number - number represent as a string
- *
- * @returns {string}
- */
-Converter.prototype.convert = function(number) {
-    var i, divide, newlen,
-    numberMap = {},
-    fromBase = this.srcAlphabet.length,
-    toBase = this.dstAlphabet.length,
-    length = number.length,
-    result = '';
-
-    if (this.srcAlphabet === this.dstAlphabet) {
-        return number;
-    }
-
-    for (i = 0; i < length; i++) {
-        numberMap[i] = this.srcAlphabet.indexOf(number[i]);
-    }
-    do {
-        divide = 0;
-        newlen = 0;
-        for (i = 0; i < length; i++) {
-            divide = divide * fromBase + numberMap[i];
-            if (divide >= toBase) {
-                numberMap[newlen++] = parseInt(divide / toBase, 10);
-                divide = divide % toBase;
-            } else if (newlen > 0) {
-                numberMap[newlen++] = 0;
-            }
-        }
-        length = newlen;
-        result = this.dstAlphabet[divide] + result;
-    } while (newlen != 0);
-
-    return result;
-}
-
-module.exports = Converter;
-},{}],5:[function(require,module,exports){
+},{"jssha":3}],3:[function(require,module,exports){
 /*
  A JavaScript implementation of the SHA family of hashes, as
  defined in FIPS PUB 180-4 and FIPS PUB 202, as well as the corresponding
@@ -330,7 +255,7 @@ f[d]>>>24));for(c=0;24>c;c+=1){k=B("SHA3-");for(d=0;5>d;d+=1)g[d]=A(b[d][0],b[d]
 3409855158),new a(1501505948,4234509866),new a(1607167915,987167468),new a(1816402316,1246189591)];W=[new a(0,1),new a(0,32898),new a(2147483648,32906),new a(2147483648,2147516416),new a(0,32907),new a(0,2147483649),new a(2147483648,2147516545),new a(2147483648,32777),new a(0,138),new a(0,136),new a(0,2147516425),new a(0,2147483658),new a(0,2147516555),new a(2147483648,139),new a(2147483648,32905),new a(2147483648,32771),new a(2147483648,32770),new a(2147483648,128),new a(0,32778),new a(2147483648,
 2147483658),new a(2147483648,2147516545),new a(2147483648,32896),new a(0,2147483649),new a(2147483648,2147516424)];V=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];"function"===typeof define&&define.amd?define(function(){return C}):"undefined"!==typeof exports?("undefined"!==typeof module&&module.exports&&(module.exports=C),exports=C):X.jsSHA=C})(this);
 
-},{}],6:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 // Circle shaped progress bar
 
 var Shape = require('./shape');
@@ -372,7 +297,7 @@ Circle.prototype._trailString = function _trailString(opts) {
 
 module.exports = Circle;
 
-},{"./shape":11,"./utils":12}],7:[function(require,module,exports){
+},{"./shape":9,"./utils":10}],5:[function(require,module,exports){
 // Line shaped progress bar
 
 var Shape = require('./shape');
@@ -403,7 +328,7 @@ Line.prototype._trailString = function _trailString(opts) {
 
 module.exports = Line;
 
-},{"./shape":11,"./utils":12}],8:[function(require,module,exports){
+},{"./shape":9,"./utils":10}],6:[function(require,module,exports){
 module.exports = {
     // Higher level API, different shaped progress bars
     Line: require('./line'),
@@ -422,7 +347,7 @@ module.exports = {
     utils: require('./utils')
 };
 
-},{"./circle":6,"./line":7,"./path":9,"./semicircle":10,"./shape":11,"./utils":12}],9:[function(require,module,exports){
+},{"./circle":4,"./line":5,"./path":7,"./semicircle":8,"./shape":9,"./utils":10}],7:[function(require,module,exports){
 // Lower level API to animate any kind of svg path
 
 var Tweenable = require('shifty');
@@ -596,7 +521,7 @@ Path.prototype._easing = function _easing(easing) {
 
 module.exports = Path;
 
-},{"./utils":12,"shifty":14}],10:[function(require,module,exports){
+},{"./utils":10,"shifty":12}],8:[function(require,module,exports){
 // Semi-SemiCircle shaped progress bar
 
 var Shape = require('./shape');
@@ -646,7 +571,7 @@ SemiCircle.prototype._trailString = Circle.prototype._trailString;
 
 module.exports = SemiCircle;
 
-},{"./circle":6,"./shape":11,"./utils":12}],11:[function(require,module,exports){
+},{"./circle":4,"./shape":9,"./utils":10}],9:[function(require,module,exports){
 // Base object for different progress bar shapes
 
 var Path = require('./path');
@@ -966,7 +891,7 @@ Shape.prototype._warnContainerAspectRatio = function _warnContainerAspectRatio(c
 
 module.exports = Shape;
 
-},{"./path":9,"./utils":12}],12:[function(require,module,exports){
+},{"./path":7,"./utils":10}],10:[function(require,module,exports){
 // Utility functions
 
 var PREFIXES = 'Webkit Moz O ms'.split(' ');
@@ -1105,7 +1030,7 @@ module.exports = {
     removeChildren: removeChildren
 };
 
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'
@@ -1734,7 +1659,7 @@ var QRCode;
 	
 }));
 
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /* shifty - v1.5.3 - 2016-11-29 - http://jeremyckahn.github.io/shifty */
 ;(function () {
   var root = this || Function('return this')();
