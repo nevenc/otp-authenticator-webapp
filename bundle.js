@@ -114,7 +114,8 @@ history.pushState(history.state, document.title, window.location.pathname);
 
 //'...?_=otpauth://totp/ACCOUNT?secret=JBSWY3DPEHPK3PXP&issuer=ISSUER';
 var otpauthUrl = document.location.search.replace(/^(.*_=)|(.*)/, "");
-document.getElementById('inputSecret').value = otpauthUrl
+var secret = urlSearchParams.get('secret');
+document.getElementById('inputSecret').value = otpauthUrl || secret;
 
 update();
 
@@ -145,7 +146,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-d3ac9369daa65e1e9eec1903c456223c64ae42e2"})
+}).call(this,{"version":"1.2.8-4d1e48ad8203217d058ed8614a777e9c6eb91244"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
