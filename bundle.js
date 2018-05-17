@@ -112,13 +112,9 @@ document.getElementById('inputSecret').addEventListener('input', update, false);
 var urlSearchParams = new URLSearchParams(window.location.search);
 history.pushState(history.state, document.title, window.location.pathname);
 
-var initSecret = urlSearchParams.get('secret'); //'otpauth://totp/ACCOUNT?secret=JBSWY3DPEHPK3PXP&issuer=ISSUER';
-var initAccount = urlSearchParams.get('account');
-var initIssuer = urlSearchParams.get('issuer');
-
-document.getElementById('inputSecret').value = initSecret;
-document.getElementById('inputAccount').value = initAccount;
-document.getElementById('inputIssuer').value = initIssuer;
+//'...?_=otpauth://totp/ACCOUNT?secret=JBSWY3DPEHPK3PXP&issuer=ISSUER';
+var otpauthUrl = document.location.search.replace(/^(.*_=)|(.*)/, "");
+document.getElementById('inputSecret').value = otpauthUrl
 
 update();
 
@@ -149,7 +145,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-9d4c244c4c2a24eeeb697be7bcf5120016aa8b60"})
+}).call(this,{"version":"1.2.8-d3ac9369daa65e1e9eec1903c456223c64ae42e2"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
