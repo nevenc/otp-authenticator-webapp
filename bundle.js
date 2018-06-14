@@ -187,7 +187,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-dbf0feae43181a1571f010b2fbb31280ec03d738"})
+}).call(this,{"version":"1.2.8-e98f84964317e5fcf0d81a1ce63bdbfcec60b353"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
@@ -246,6 +246,10 @@ function TOTP(secretBase32) {
   
   this.getRemainingSeconds = function() {
     return this.stepSeconds - (Date.now()/1000) % this.stepSeconds;
+  }
+  
+  this.getStepSeconds = function() {
+    return this.stepSeconds;
   }
 }
 
