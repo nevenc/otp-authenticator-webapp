@@ -171,10 +171,11 @@ function refresh_totp() {
     var totp = new TOTP(secret);
     try {
       totpTokenElement.innerHTML = totp.getToken().replace(/(...)(?=.)/g, "$& ");
-      if (totp.getRemainingSeconds() / 30.0 <= 0) {
+      var normalizedRemainingTime = totp.getRemainingSeconds() / totp.getStepSeconds();
+      if ( normalizedRemainingTime <= 0) {
         totpRemainingSecondsCircle.set(1.0);
       } else {
-        totpRemainingSecondsCircle.animate(totp.getRemainingSeconds() / 30.0);
+        totpRemainingSecondsCircle.animate(normalizedRemainingTime);
       }
     } catch (err) {
       console.log(err);
@@ -187,7 +188,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-e98f84964317e5fcf0d81a1ce63bdbfcec60b353"})
+}).call(this,{"version":"1.2.8-aa153772347fc336c3800c6d9b761806181b7fe5"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
