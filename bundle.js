@@ -101,10 +101,11 @@ var update = function() {
     var otpauthUrl = buildOTPauthUrl(secret, account, issuer);
     qrImage.makeCode(otpauthUrl);
     qrImage._el.removeAttribute("title"); // WORKAROUND: prevent showing otpauthUrl in html
-    document.getElementById('inputIssuer').style.display='';
+    document.getElementById('otpauth-qr-overlay').style.display='';
   } else {
     qrImage.makeCode('');
-    document.getElementById('inputIssuer').style.display='none';
+    document.getElementById('otpauth-qr-overlay').innerHTML = "Input missing!";
+    document.getElementById('otpauth-qr-overlay').style.display='none';
   }
 };
 
@@ -190,7 +191,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-9c7cfd0ce79e2ed57709c41a704de07106688911"})
+}).call(this,{"version":"1.2.8-62f9439f30851e3e725ecb548435ea17fe7ab246"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
