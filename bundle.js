@@ -101,8 +101,10 @@ var update = function() {
     var otpauthUrl = buildOTPauthUrl(secret, account, issuer);
     qrImage.makeCode(otpauthUrl);
     qrImage._el.removeAttribute("title"); // WORKAROUND: prevent showing otpauthUrl in html
+    document.getElementById('inputIssuer').style.display='';
   } else {
-    qrImage._el.getElementsByTagName("img")[0].src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="; // WORKAROUND: clean image
+    qrImage.makeCode('');
+    document.getElementById('inputIssuer').style.display='none';
   }
 };
 
@@ -188,7 +190,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-20bba0c52782dd053b374dfefaba1319893af62b"})
+}).call(this,{"version":"1.2.8-e8c14b374202beda637fe1f82e14beb0b0441b44"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
