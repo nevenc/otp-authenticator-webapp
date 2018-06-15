@@ -91,6 +91,7 @@ var update = function() {
     secret = otpauthParameters.secret || ' ';
     issuer = otpauthParameters.issuer;
     account = otpauthParameters.account;
+    showOtpauthQr();
   }
   
   document.getElementById('inputSecret').value = secret || '';
@@ -133,19 +134,28 @@ document.getElementById('inputSecret').addEventListener('input', update, false);
   }, false);
 });
 
+
+function showOtpauthQr() {
+  document.getElementById('otpauth-qr').display = "";
+  document.getElementById('inputAccount').display = "";
+  document.getElementById('inputIssuer').display = "";
+}
+
+function hideOtpauthQr() {
+  document.getElementById('otpauth-qr').display = "none";
+  document.getElementById('inputAccount').display = "none";
+  document.getElementById('inputIssuer').display = "none";
+}
+
 ['click', 'tap'].forEach(function(event) {
   document.getElementById('button-otpauth-qr').addEventListener(event, function(e) {
     var otpauthQrImageElement = document.getElementById('otpauth-qr');
     var accountInputElement = document.getElementById('inputAccount');
     var issuerInputElement = document.getElementById('inputIssuer');
     if (otpauthQrImageElement.style.display == 'none') {
-      otpauthQrImageElement.style.display = "";
-      accountInputElement.style.display = "";
-      issuerInputElement.style.display = "";
+      showOtpauthQr();
     } else {
-      otpauthQrImageElement.style.display = "none";
-      accountInputElement.style.display = "none";
-      issuerInputElement.style.display = "none";
+      hideOtpauthQr();
     }
   }, false);
 });
@@ -191,7 +201,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.3.0-4253f75decaf0fd48eb6489f9b9c8aa89fc11e78"})
+}).call(this,{"version":"1.3.0-af320330ff393fa22691ca6ee34d521979605172"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
