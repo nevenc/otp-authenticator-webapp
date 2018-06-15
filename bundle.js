@@ -191,7 +191,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.2.8-8383b9123b016960b8c922987431de65f99f4346"})
+}).call(this,{"version":"1.2.8-8e61eee0e6eb245204c5e6dd850c6d83ffa63852"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
