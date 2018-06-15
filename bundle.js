@@ -148,7 +148,7 @@ function hideOtpauthQr() {
 }
 
 function toggleOtpauthQr() {
-  if (otpauthQrImageElement.style.display == 'none') {
+  if (document.getElementById('otpauth-qr').style.display == 'none') {
     showOtpauthQr();
   } else {
     hideOtpauthQr();
@@ -205,7 +205,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.3.0-fe31ef3446db7652c9d49612b6f8365580258450"})
+}).call(this,{"version":"1.3.0-195538c0c002519d229d1d301b6ad9606eb911c0"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
