@@ -136,15 +136,23 @@ document.getElementById('inputSecret').addEventListener('input', update, false);
 
 
 function showOtpauthQr() {
-  document.getElementById('otpauth-qr').display = "";
-  document.getElementById('inputAccount').display = "";
-  document.getElementById('inputIssuer').display = "";
+  document.getElementById('otpauth-qr').style.display = "";
+  document.getElementById('inputAccount').style.display = "";
+  document.getElementById('inputIssuer').style.display = "";
 }
 
 function hideOtpauthQr() {
-  document.getElementById('otpauth-qr').display = "none";
-  document.getElementById('inputAccount').display = "none";
-  document.getElementById('inputIssuer').display = "none";
+  document.getElementById('otpauth-qr').style.display = "none";
+  document.getElementById('inputAccount').style.display = "none";
+  document.getElementById('inputIssuer').style.display = "none";
+}
+
+function toggleOtpauthQr() {
+  if (otpauthQrImageElement.style.display == 'none') {
+    showOtpauthQr();
+  } else {
+    hideOtpauthQr();
+  }
 }
 
 ['click', 'tap'].forEach(function(event) {
@@ -152,11 +160,7 @@ function hideOtpauthQr() {
     var otpauthQrImageElement = document.getElementById('otpauth-qr');
     var accountInputElement = document.getElementById('inputAccount');
     var issuerInputElement = document.getElementById('inputIssuer');
-    if (otpauthQrImageElement.style.display == 'none') {
-      showOtpauthQr();
-    } else {
-      hideOtpauthQr();
-    }
+    toggleOtpauthQr();
   }, false);
 });
 
@@ -201,7 +205,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.3.0-af320330ff393fa22691ca6ee34d521979605172"})
+}).call(this,{"version":"1.3.0-fe31ef3446db7652c9d49612b6f8365580258450"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
