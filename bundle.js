@@ -117,7 +117,7 @@ document.getElementById('inputSecret').addEventListener('input', update, false);
 
 ['click', 'tap'].forEach(function(event) {
   document.getElementById('totp-token').addEventListener(event, function() {
-    copyToClipboard(this.innerText.replace(/\s/g, ''));
+    copyToClipboard(this.innerText);
     showToast("Token copied!");
   }, false);
 });
@@ -173,7 +173,7 @@ function refresh_totp() {
     secret = secret.replace(/\s/g, '');
     var totp = new TOTP(secret);
     try {
-      totpTokenElement.innerHTML = totp.getToken().replace(/(...)(?=.)/g, "$& ");
+      totpTokenElement.innerHTML = totp.getToken().replace(/(...)(...)/g, '<span>$1</span><span style="margin-left:8px">$2</span>');
       var normalizedRemainingTime = totp.getRemainingSeconds() / totp.getStepSeconds();
       if ( normalizedRemainingTime <= 0) {
         totpRemainingSecondsCircle.set(1.0);
@@ -191,7 +191,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.3.0-cc450c75e599176629ebf056c1a97d5bac4af00e"})
+}).call(this,{"version":"1.3.0-18fcbd59b266c83565a7154d2ea075b5ba40a80a"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
