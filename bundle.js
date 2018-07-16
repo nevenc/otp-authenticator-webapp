@@ -166,14 +166,11 @@ function toggleOtpauthQr() {
 
 // ################  run  ##################
 
-var urlSearchParams = new URLSearchParams(window.location.search.replace(/_=.*$/, ""));
-var secret = urlSearchParams.get('secret');
-var otpauthUrl = document.location.search.replace(/^(.*_=)|(.*)/, ""); //'...?_=otpauth://totp/ACCOUNT?secret=JBSWY3DPEHPK3PXP&issuer=ISSUER';
+var secret = window.location.hash.substr(1);
+// remove hash
+history.pushState(history.state, document.title, window.location.pathname);
 
 document.getElementById('inputSecret').value = otpauthUrl || secret;
-
-// remove searchParams
-history.pushState(history.state, document.title, window.location.pathname);
 
 update();
 
@@ -205,7 +202,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"1.3.0-a270a696c1ae4a9185c9618ddaccbb200d62362f"})
+}).call(this,{"version":"2.0.0-5f685235a2413a1b47d5680617d8ad017a38f5b6"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
