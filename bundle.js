@@ -166,9 +166,11 @@ function toggleOtpauthQr() {
 
 // ################  run  ##################
 
-var secret = window.location.hash.substr(1);
-history.pushState(history.state, document.title, window.location.pathname); // remove hash
-document.getElementById('inputSecret').value = secret;
+window.onhashchange = function(){
+  var secret = window.location.hash.substr(1);
+  history.pushState(history.state, document.title, window.location.pathname); // remove hash
+  document.getElementById('inputSecret').value = secret;
+};
 
 update();
 
@@ -200,7 +202,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"2.0.0-3fb8630e80478c34f8a14874fe4ef52fe758d44a"})
+}).call(this,{"version":"2.0.0-e980aab4795f17e443668f1420a3fbcc2ea8651a"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
