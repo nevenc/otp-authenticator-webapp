@@ -225,7 +225,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"2.0.0-b358c4896a9ab92dfd1eb44c5bb1a6b88a53778c"})
+}).call(this,{"version":"2.0.0-75f0b5b712415c489c0c34a2758d9f7b099ada06"})
 },{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
 var jsSHA = require('jssha');
 
