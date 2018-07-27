@@ -183,8 +183,8 @@ function refresh_totp() {
   var secret = document.getElementById('inputSecret').value;
   if (secret) {
     secret = secret.replace(/\s/g, '');
-    var totp = new TOTP(secret);
     try {
+      var totp = new TOTP(secret);
       totpTokenElement.innerHTML = totp.getToken().replace(/(...)(...)/g, '<span>$1</span><span style="margin-left:8px">$2</span>');
       var normalizedRemainingTime = totp.getRemainingSeconds() / totp.getStepSeconds();
       if (normalizedRemainingTime <= 0) {
@@ -198,11 +198,11 @@ function refresh_totp() {
       totpRemainingSecondsCircle.set(0.0);
     }
   } else {
-    totpTokenElement.innerHTML = '';
+    totpTokenElement.innerHTML = '000000'.replace(/(...)(...)/g, '<span>$1</span><span style="margin-left:8px">$2</span>');;
     totpRemainingSecondsCircle.set(0.0);
   }
 }
-}).call(this,{"version":"2.0.0-13bec984656f22e655a6d8b72ab19983704b4838"})
+}).call(this,{"version":"2.0.0-9b0c1275e9abf6a4bac077cf39bf628750d2a83a"})
 },{"./cookies":1,"./otpauthUrl":3,"./totp":4,"progressbar.js":8,"qrcodejs2":13}],3:[function(require,module,exports){
 module.exports = {
 
@@ -260,6 +260,10 @@ const base32ToHex = (base32) => {
 };
 
 function TOTP(secretBase32) {
+  if(secretBase32.length < 16){
+    throw new Error("Secret minimum length is 16, but was only" + secretBase32.length);
+  }
+  
   this.secretBase32 = secretBase32;
   this.stepSeconds = 30;
   this.tokenLength = 6;
