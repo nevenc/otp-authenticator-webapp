@@ -1,49 +1,27 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+module.exports = {
+
+  get: (name) => {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    if (match) return match[2];
+  },
+
+  set: (name, value) => {
+    document.cookie = name + "=" + value + "; path=/";
+  }
+};
+},{}],2:[function(require,module,exports){
 (function (app){
 "use strict";
 
 document.getElementById('appversion').innerText = app.version;
 
 var TOTP = require('./totp');
+var Cookies = require('./cookies');
+var OTPAuthUrl = require('./otpauthUrl');
 
 var ProgressBar = require('progressbar.js');
 var QRCode = require('qrcodejs2');
-
-function getCookie(name) {
-  var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  if (match) return match[2];
-}
-
-function setCookie(name, value) {
-  document.cookie = name + "=" + value + "; path=/";
-}
-
-function buildOTPauthUrl(secret, account, issuer){
-  return 'otpauth://totp/' + encodeURIComponent(account) + '?secret=' + encodeURIComponent(secret) + '&issuer=' + encodeURIComponent(issuer);
-}
-
-function parseOTPauthUrl(otpauthUrlString){
-  var otpauthUrl = new URL(otpauthUrlString);
-  
-  var result = {};
-  
-  if(otpauthUrl.searchParams.get('secret')){
-    result.secret = decodeURIComponent(otpauthUrl.searchParams.get('secret'));
-  }
-  
-  var label = decodeURIComponent(otpauthUrl.pathname.replace(RegExp('^//totp/'), ''));
-  if(!label.includes(":")){
-    result.account = label;
-  } else {
-    result.account = label.split(':')[1];
-    result.issuer = label.split(':')[0];
-  }
-  if(otpauthUrl.searchParams.get('issuer')){
-    result.issuer = decodeURIComponent(otpauthUrl.searchParams.get('issuer'));
-  }
-  
-  return result;
-}
 
 function copyToClipboard(value) {
   // Create a temporary input
@@ -94,28 +72,28 @@ var update = function() {
   var secret = document.getElementById('inputSecret').value;
   var issuer = document.getElementById('inputIssuer').value;
   var account = document.getElementById('inputAccount').value;
-  
+
   if (secret.startsWith("otpauth://totp/")) {
-    var otpauthParameters = parseOTPauthUrl(secret);
-    secret = otpauthParameters.secret || ' ';
+    var otpauthParameters = OTPAuthUrl.parse(secret);
+    secret = otpauthParameters.secret ||  ' ';
     issuer = otpauthParameters.issuer;
     account = otpauthParameters.account;
     showOtpauthQr();
   }
-  
-  document.getElementById('inputSecret').value = secret || '';
-  document.getElementById('inputIssuer').value = issuer || '';
-  document.getElementById('inputAccount').value = account || '';
-  
-  if(secret && account){
-    var otpauthUrl = buildOTPauthUrl(secret, account, issuer);
+
+  document.getElementById('inputSecret').value = secret ||  '';
+  document.getElementById('inputIssuer').value = issuer ||  '';
+  document.getElementById('inputAccount').value = account ||  '';
+
+  if (secret && account) {
+    var otpauthUrl = OTPAuthUrl.build(secret, account, issuer);
     qrImage.makeCode(otpauthUrl);
     qrImage._el.removeAttribute("title"); // WORKAROUND: prevent showing otpauthUrl in html
-    document.getElementById('otpauth-qr-overlay').style.display='none';
+    document.getElementById('otpauth-qr-overlay').style.display = 'none';
   } else {
     qrImage.makeCode('');
     document.getElementById('otpauth-qr-overlay').innerHTML = "Input missing!";
-    document.getElementById('otpauth-qr-overlay').style.display='';
+    document.getElementById('otpauth-qr-overlay').style.display = '';
   }
 };
 
@@ -137,7 +115,7 @@ document.getElementById('inputSecret').addEventListener('input', update, false);
     var secret = document.getElementById('inputSecret').value;
     var account = document.getElementById('inputAccount').value;
     var issuer = document.getElementById('inputIssuer').value;
-    var otpauthUrl = buildOTPauthUrl(secret, account, issuer);
+    var otpauthUrl = OTPAuthUrl.build(secret, account, issuer);
     copyToClipboard(otpauthUrl);
     showToast("OTPAuth url copied!");
   }, false);
@@ -167,7 +145,7 @@ function toggleOtpauthQr() {
 function toggleDarkMode() {
   var darkStyleElement = document.getElementById('dark-style');
   darkStyleElement.disabled = !darkStyleElement.disabled;
-  setCookie("otp-authenticator.darkStyle", !darkStyleElement.disabled);
+  Cookies.set("otp-authenticator.darkStyle", !darkStyleElement.disabled);
 }
 
 ['click', 'tap'].forEach(function(event) {
@@ -184,12 +162,12 @@ function toggleDarkMode() {
 
 // ################  run  ##################
 
-var darkStyleCookie = getCookie("otp-authenticator.darkStyle");
+var darkStyleCookie = Cookies.get("otp-authenticator.darkStyle");
 if (darkStyleCookie === "true") {
   toggleDarkMode();
 }
 
-window.onhashchange = function(){
+window.onhashchange = function() {
   var secret = window.location.hash.substr(1);
   history.pushState(history.state, document.title, window.location.pathname); // remove hash
   document.getElementById('inputSecret').value = secret;
@@ -209,7 +187,7 @@ function refresh_totp() {
     try {
       totpTokenElement.innerHTML = totp.getToken().replace(/(...)(...)/g, '<span>$1</span><span style="margin-left:8px">$2</span>');
       var normalizedRemainingTime = totp.getRemainingSeconds() / totp.getStepSeconds();
-      if ( normalizedRemainingTime <= 0) {
+      if (normalizedRemainingTime <= 0) {
         totpRemainingSecondsCircle.set(1.0);
       } else {
         totpRemainingSecondsCircle.animate(normalizedRemainingTime);
@@ -224,52 +202,74 @@ function refresh_totp() {
     totpRemainingSecondsCircle.set(0.0);
   }
 }
+}).call(this,{"version":"2.0.0-13bec984656f22e655a6d8b72ab19983704b4838"})
+},{"./cookies":1,"./otpauthUrl":3,"./totp":4,"progressbar.js":8,"qrcodejs2":13}],3:[function(require,module,exports){
+module.exports = {
 
-}).call(this,{"version":"2.0.0-165f415445d676c7b485df167a4971f453bf025f"})
-},{"./totp":2,"progressbar.js":6,"qrcodejs2":11}],2:[function(require,module,exports){
+  build: (secret, account, issuer) => {
+    return 'otpauth://totp/' + encodeURIComponent(account) + '?secret=' + encodeURIComponent(secret) + '&issuer=' + encodeURIComponent(issuer);
+  },
+
+  parse: (otpauthUrlString) => {
+    var otpauthUrl = new URL(otpauthUrlString);
+
+    var result = {};
+
+    if (otpauthUrl.searchParams.get('secret')) {
+      result.secret = decodeURIComponent(otpauthUrl.searchParams.get('secret'));
+    }
+
+    var label = decodeURIComponent(otpauthUrl.pathname.replace(RegExp('^//totp/'), ''));
+    if (!label.includes(":")) {
+      result.account = label;
+    } else {
+      result.account = label.split(':')[1];
+      result.issuer = label.split(':')[0];
+    }
+    if (otpauthUrl.searchParams.get('issuer')) {
+      result.issuer = decodeURIComponent(otpauthUrl.searchParams.get('issuer'));
+    }
+
+    return result;
+  }
+};
+},{}],4:[function(require,module,exports){
 var jsSHA = require('jssha');
 
-function decToHex(dec){
-  return dec.toString(16);
-}
+const decToHex = (dec) => dec.toString(16);
+const hexToDec = (hex) => parseInt(hex, 16);
 
-function hexToDec(hex){
-  return parseInt(hex, 16);
-}
+const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const base32ToHex = (base32) => {
+  let bits = base32.split('')
+    .map(char => {
+      let val = base32chars.indexOf(char.toUpperCase());
+      if (val < 0) {
+        throw new Error("Illegal Base32 character: " + char);
+      }
+      return val;
+    })
+    .map(val => val.toString(2).padStart(5, '0'))
+    .join('');
 
-function base32ToHex(base32) {
-  const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-
-  let bits = '';
-  for (let i = 0; i < base32.length; i++) {
-    let val = base32chars.indexOf(base32.charAt(i).toUpperCase());
-    if(val < 0){
-      throw new Error("Illegal Base32 character: " + base32.charAt(i));
-    }
-    bits += val.toString(2).padStart(5, '0');
-  }
-
-  let hex = '';
-  for (let i = 0; i + 4 <= bits.length; i += 4) {
-    let chunk = bits.substr(i, 4);
-    hex += parseInt(chunk, 2).toString(16);
- }
+  let hex = bits.match(/.{4}/g)
+    .map(chunk => parseInt(chunk, 2).toString(16))
+    .join('');
 
   return hex;
-}
-
+};
 
 function TOTP(secretBase32) {
   this.secretBase32 = secretBase32;
   this.stepSeconds = 30;
   this.tokenLength = 6;
-  
-  this.getToken = function() {
+
+  this.getToken = () => {
     let secretHex = base32ToHex(this.secretBase32);
     if (secretHex.length % 2 !== 0) {
       secretHex += '0';
     }
-    let counter = Math.floor(Date.now()/1000/this.stepSeconds);
+    let counter = Math.floor(Date.now() / 1000 / this.stepSeconds);
     let counterHex = decToHex(counter);
 
     let shaObj = new jsSHA("SHA-1", "HEX");
@@ -277,23 +277,19 @@ function TOTP(secretBase32) {
     shaObj.update(counterHex.padStart(16, "0"));
     let hmac = shaObj.getHMAC("HEX");
     let offset = hexToDec(hmac.slice(-1));
-    let token = String(hexToDec(hmac.substr(offset * 2, 8)) & hexToDec('7fffffff')).slice(-6);
+    let token = String(hexToDec(hmac.substr(offset * 2, 8)) & hexToDec('7fffffff'))
+      .slice(-this.tokenLength);
 
     return token;
   }
-  
-  this.getRemainingSeconds = function() {
-    return this.stepSeconds - (Date.now()/1000) % this.stepSeconds;
-  }
-  
-  this.getStepSeconds = function() {
-    return this.stepSeconds;
-  }
-}
+
+  this.getRemainingSeconds = () => this.stepSeconds - (Date.now() / 1000) % this.stepSeconds;
+  this.getStepSeconds = () => this.stepSeconds;
+  this.getTokenLength = () => this.tokenLength;
+};
 
 module.exports = TOTP;
-
-},{"jssha":3}],3:[function(require,module,exports){
+},{"jssha":5}],5:[function(require,module,exports){
 /*
  A JavaScript implementation of the SHA family of hashes, as
  defined in FIPS PUB 180-4 and FIPS PUB 202, as well as the corresponding
@@ -340,7 +336,7 @@ new b(d[40],1290863460),new b(d[41],3158454273),new b(d[42],3505952657),new b(d[
 1246189591)];X=[new b(0,1),new b(0,32898),new b(2147483648,32906),new b(2147483648,2147516416),new b(0,32907),new b(0,2147483649),new b(2147483648,2147516545),new b(2147483648,32777),new b(0,138),new b(0,136),new b(0,2147516425),new b(0,2147483658),new b(0,2147516555),new b(2147483648,139),new b(2147483648,32905),new b(2147483648,32771),new b(2147483648,32770),new b(2147483648,128),new b(0,32778),new b(2147483648,2147483658),new b(2147483648,2147516545),new b(2147483648,32896),new b(0,2147483649),
 new b(2147483648,2147516424)];W=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];"function"===typeof define&&define.amd?define(function(){return C}):"undefined"!==typeof exports?("undefined"!==typeof module&&module.exports&&(module.exports=C),exports=C):Y.jsSHA=C})(this);
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // Circle shaped progress bar
 
 var Shape = require('./shape');
@@ -382,7 +378,7 @@ Circle.prototype._trailString = function _trailString(opts) {
 
 module.exports = Circle;
 
-},{"./shape":9,"./utils":10}],5:[function(require,module,exports){
+},{"./shape":11,"./utils":12}],7:[function(require,module,exports){
 // Line shaped progress bar
 
 var Shape = require('./shape');
@@ -413,7 +409,7 @@ Line.prototype._trailString = function _trailString(opts) {
 
 module.exports = Line;
 
-},{"./shape":9,"./utils":10}],6:[function(require,module,exports){
+},{"./shape":11,"./utils":12}],8:[function(require,module,exports){
 module.exports = {
     // Higher level API, different shaped progress bars
     Line: require('./line'),
@@ -432,7 +428,7 @@ module.exports = {
     utils: require('./utils')
 };
 
-},{"./circle":4,"./line":5,"./path":7,"./semicircle":8,"./shape":9,"./utils":10}],7:[function(require,module,exports){
+},{"./circle":6,"./line":7,"./path":9,"./semicircle":10,"./shape":11,"./utils":12}],9:[function(require,module,exports){
 // Lower level API to animate any kind of svg path
 
 var Tweenable = require('shifty');
@@ -606,7 +602,7 @@ Path.prototype._easing = function _easing(easing) {
 
 module.exports = Path;
 
-},{"./utils":10,"shifty":12}],8:[function(require,module,exports){
+},{"./utils":12,"shifty":14}],10:[function(require,module,exports){
 // Semi-SemiCircle shaped progress bar
 
 var Shape = require('./shape');
@@ -656,7 +652,7 @@ SemiCircle.prototype._trailString = Circle.prototype._trailString;
 
 module.exports = SemiCircle;
 
-},{"./circle":4,"./shape":9,"./utils":10}],9:[function(require,module,exports){
+},{"./circle":6,"./shape":11,"./utils":12}],11:[function(require,module,exports){
 // Base object for different progress bar shapes
 
 var Path = require('./path');
@@ -976,7 +972,7 @@ Shape.prototype._warnContainerAspectRatio = function _warnContainerAspectRatio(c
 
 module.exports = Shape;
 
-},{"./path":7,"./utils":10}],10:[function(require,module,exports){
+},{"./path":9,"./utils":12}],12:[function(require,module,exports){
 // Utility functions
 
 var PREFIXES = 'Webkit Moz O ms'.split(' ');
@@ -1115,7 +1111,7 @@ module.exports = {
     removeChildren: removeChildren
 };
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'
@@ -1744,7 +1740,7 @@ var QRCode;
 	
 }));
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /* shifty - v1.5.3 - 2016-11-29 - http://jeremyckahn.github.io/shifty */
 ;(function () {
   var root = this || Function('return this')();
@@ -3397,4 +3393,4 @@ var Tweenable = (function () {
 
 }).call(null);
 
-},{}]},{},[1]);
+},{}]},{},[2]);
