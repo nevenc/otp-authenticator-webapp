@@ -95,6 +95,7 @@ var update = function() {
     document.getElementById('otpauth-qr-overlay').innerHTML = "Input missing!";
     document.getElementById('otpauth-qr-overlay').style.display = '';
   }
+  refresh_totp();
 };
 
 // ################  input handling  ##################
@@ -202,7 +203,8 @@ function refresh_totp() {
     totpRemainingSecondsCircle.set(0.0);
   }
 }
-}).call(this,{"version":"2.0.0-7e7b7f0cea20e261eb6ee1d29a39bb80ba90b007"})
+
+}).call(this,{"version":"2.0.0-35cd23a2894bc0fee33b716ff7854d5a5a9a8f6e"})
 },{"./cookies":1,"./otpauthUrl":3,"./totp":4,"progressbar.js":8,"qrcodejs2":13}],3:[function(require,module,exports){
 module.exports = {
 
