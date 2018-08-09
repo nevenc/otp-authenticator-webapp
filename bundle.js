@@ -78,7 +78,6 @@ var update = function() {
     secret = otpauthParameters.secret ||  ' ';
     issuer = otpauthParameters.issuer;
     account = otpauthParameters.account;
-    showOtpauthQr();
   }
 
   document.getElementById('inputSecret').value = secret ||  '';
@@ -204,7 +203,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"2.0.0-35cd23a2894bc0fee33b716ff7854d5a5a9a8f6e"})
+}).call(this,{"version":"2.0.0-67e81c4887ffeef26a29b1dd1f00ab6ccf45251c"})
 },{"./cookies":1,"./otpauthUrl":3,"./totp":4,"progressbar.js":8,"qrcodejs2":13}],3:[function(require,module,exports){
 module.exports = {
 
