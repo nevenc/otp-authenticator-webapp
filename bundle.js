@@ -155,7 +155,7 @@ function toggleDarkMode() {
 });
 
 ['click', 'tap'].forEach(function(event) {
-  document.getElementById('appname').addEventListener(event, function(e) {
+  document.getElementById('light-switch').addEventListener(event, function(e) {
     toggleDarkMode();
   }, false);
 });
@@ -203,7 +203,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"2.0.0-67e81c4887ffeef26a29b1dd1f00ab6ccf45251c"})
+}).call(this,{"version":"2.0.0-52f6b3c6d7e03f388f6672e567364f8793bfe9ae"})
 },{"./cookies":1,"./otpauthUrl":3,"./totp":4,"progressbar.js":8,"qrcodejs2":13}],3:[function(require,module,exports){
 module.exports = {
 
