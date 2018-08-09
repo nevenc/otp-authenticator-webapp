@@ -203,7 +203,7 @@ function refresh_totp() {
   }
 }
 
-}).call(this,{"version":"2.0.0-2d0fb058295ba23aea229ae0dfeb818c4356617e"})
+}).call(this,{"version":"2.0.0-39e1b51f66f10246bdae103c0518e1996a210b1b"})
 },{"./cookies":1,"./otpauthUrl":3,"./totp":4,"progressbar.js":8,"qrcodejs2":13}],3:[function(require,module,exports){
 module.exports = {
 
